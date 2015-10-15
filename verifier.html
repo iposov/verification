@@ -1,0 +1,89 @@
+﻿<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Verification</title>
+    <script src="https://sagecell.sagemath.org/static/jquery.min.js"></script>
+    <script src="https://sagecell.sagemath.org/static/embedded_sagecell.js"></script>
+    <script>$(function () {
+    // Make the div with id 'mycell' a Sage cell
+    sagecell.makeSagecell({inputLocation:  '#load',
+                           template:       sagecell.templates.minimal,
+                           autoeval: true});
+    sagecell.makeSagecell({inputLocation:  '#mycell',
+                           template:       sagecell.templates.minimal,
+                           autoeval: true});
+    });
+    </script>
+  </head>
+  <body>
+  
+    <div id='load'><script type="text/x-sage">
+    </script></div>
+
+    <div id="mycell">
+    <script type="text/x-sage">
+    
+def verifier_task(statement, check_correct, show_example, user_variables, tests):
+    show(statement)
+
+    @interact
+    def _(ans=input_box(default="", label="Your answer", type=str)):
+        try:
+            #__tmp__ = var(user_variables)
+            user_cond_str = ans
+            locs = {v: SR.var(v) for v in user_variables}
+            user_cond = sage_eval(user_cond_str, locals = locs)
+        except:
+            if ans == "":
+                print "Enter you answer"
+            else:
+                print "wrong expression"
+            return
+
+        REF = "refute"
+        COMPL = "complements"
+
+        #now test
+        wrong_test = None
+        for test in tests:
+            correct_answer = check_correct(*test)
+
+            locs = {user_variables[i] : test[i] for i in xrange(len(user_variables))}
+
+            user_answer = sage_eval(user_cond_str, locals=locs)
+
+            if (user_answer != correct_answer):
+                wrong_test = test
+                wrong_type = REF if user_answer else COMPL
+                break
+
+        if wrong_test is None:
+            print "You are correct!"
+        else:
+            print "Your answer is wrong,"
+            if wrong_type == REF:
+                print "the following example refutes it"
+            else:
+                print "the following example complements it"
+            show_example(*wrong_test)    
+    
+    
+user_variables = ['a', 'b', 'c']
+tests = [[aa, bb, cc] for aa in range(-5,6) for bb in range(-5, 6) for cc in range(-5, 6) if aa != 0]
+
+def check_correct(a, b, c):
+    return a < 0 and c < 0 and (b > 0 or b^2 - 4 * a * c < 0)
+
+def show_example(a, b, c):
+    f(x) = a * x^2 + b*x + c
+    show("$f(x) = " + latex(f(x)) + "$")
+    show(plot(f(x), (x, -5, 5)), figsize=[2, 2])
+    
+verifier_task("In what conditions on a, b, c the function $f(x) = ax^2+bx+c$ does not intersect the second quarter?", check_correct, show_example, user_variables, tests)
+    </script>
+    </div>
+
+  </body>
+</html>
