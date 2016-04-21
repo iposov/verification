@@ -42,11 +42,10 @@ def verifier_task(statement, check_correct, show_example, user_variables, tests)
                 print "wrong expression"
             return
 
-        REF = "refute"
-        COMPL = "complements"
-
         #now test
-        wrong_test = None
+        refuter_test = None
+        complementer_test = None
+        
         for test in tests:
             correct_answer = check_correct(*test)
 
@@ -55,20 +54,23 @@ def verifier_task(statement, check_correct, show_example, user_variables, tests)
             user_answer = sage_eval(user_cond_str, locals=locs)
 
             if (user_answer != correct_answer):
-                wrong_test = test
-                wrong_type = REF if user_answer else COMPL
-                break
+                if user_answer:
+                    refuter_test = test
+                else:
+                    complementer_test = test
 
-        if wrong_test is None:
+        if refuter_test is None and complementer_test is None:
             print "You are correct!"
         else:
             print "Your answer is wrong,"
-            if wrong_type == REF:
-                print "the following example refutes it"
-            else:
-                print "the following example complements it"
-            show_example(*wrong_test)    
-    
+            
+            if refuter_test is not None:
+                print "the following example refutes it:"
+                show_example(*refuter_test)
+                
+            if complementer_test is not None:
+                print "the following example complements it:"
+                show_example(*complementer_test)                           
     
 user_variables = ['a', 'b', 'c']
 tests = [[aa, bb, cc] for aa in range(-5,6) for bb in range(-5, 6) for cc in range(-5, 6) if aa != 0]
@@ -79,7 +81,7 @@ def check_correct(a, b, c):
 def show_example(a, b, c):
     f(x) = a * x^2 + b*x + c
     show("$f(x) = " + latex(f(x)) + "$")
-    show(plot(f(x), (x, -5, 5)), figsize=[2, 2])
+    show(plot(f(x), (x, -5, 5), figsize=[2, 2]))
     
 verifier_task("In what conditions on a, b, c the function $f(x) = ax^2+bx+c$ does not intersect the second quarter?", check_correct, show_example, user_variables, tests)
     </script>
