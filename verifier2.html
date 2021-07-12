@@ -24,6 +24,7 @@
 
     <div id="mycell">
     <script type="text/x-sage">
+
 def verifier_task_qe(statement, show_example, teacher_formula, n_teacher_formula):
     show(statement)
 
@@ -35,24 +36,24 @@ def verifier_task_qe(statement, show_example, teacher_formula, n_teacher_formula
         
         refuter_test = None
         complementer_test = None
-        print correct1
-        print correct2
+        print(correct1)
+        print(correct2)
         if not correct1:
             refuter_test = qepcad(n_teacher_formula, assume=ans, solution='any-point')
         if not correct2:          
-            print 'nans', nans
+            print('nans', nans)
             complementer_test = qepcad(teacher_formula, assume=nans, solution='any-point')
     
         if not correct1 or not correct2:
             if refuter_test is not None:
-                print "the following example refutes it:"
+                print("the following example refutes it:")
                 show_example(**refuter_test)
-                print refuter_test
+                print(refuter_test)
                 
             if complementer_test is not None:
-                print "the following example complements it:"
+                print("the following example complements it:")
                 show_example(**complementer_test)
-                print complementer_test
+                print(complementer_test)
                 
 var('a,b,c,x')
 
@@ -66,7 +67,7 @@ ff = qf.implies(x < 0, a * x^2 + b * x + c < 0)
 f = qf.forall(x, ff)
 nf = qf.exists(x, qf.not_(ff))
 
-print nf
+print(nf)
 
 verifier_task_qe("In what conditions on a, b, c the function $f(x) = ax+b$ does not intersect the second quarter?", show_example, f, nf)
                 

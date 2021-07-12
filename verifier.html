@@ -24,7 +24,7 @@
 
     <div id="mycell">
     <script type="text/x-sage">
-    
+
 def verifier_task(statement, check_correct, show_example, user_variables, tests):
     show(statement)
 
@@ -37,9 +37,9 @@ def verifier_task(statement, check_correct, show_example, user_variables, tests)
             user_cond = sage_eval(user_cond_str, locals = locs)
         except:
             if ans == "":
-                print "Enter you answer"
+                print("Enter you answer")
             else:
-                print "wrong expression"
+                print("wrong expression")
             return
 
         #now test
@@ -60,16 +60,16 @@ def verifier_task(statement, check_correct, show_example, user_variables, tests)
                     complementer_test = test
 
         if refuter_test is None and complementer_test is None:
-            print "You are correct!"
+            print("You are correct!")
         else:
-            print "Your answer is wrong,"
+            print("Your answer is wrong,")
             
             if refuter_test is not None:
-                print "the following example refutes it:"
+                print("the following example refutes it:")
                 show_example(*refuter_test)
                 
             if complementer_test is not None:
-                print "the following example complements it:"
+                print("the following example complements it:")
                 show_example(*complementer_test)                           
     
 user_variables = ['a', 'b', 'c']
