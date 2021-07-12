@@ -49,7 +49,7 @@ def verifier_task(statement, check_correct, show_example, user_variables, tests)
         for test in tests:
             correct_answer = check_correct(*test)
 
-            locs = {user_variables[i] : test[i] for i in xrange(len(user_variables))}
+            locs = {user_variables[i] : test[i] for i in range(len(user_variables))}
 
             user_answer = sage_eval(user_cond_str, locals=locs)
 
