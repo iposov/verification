@@ -19,7 +19,7 @@
     <script type="text/x-sage">
 from sage.misc.html import HtmlFragment
 
-def verifier_task(statement, check_correct, show_example, user_variables, tests):
+def verifier_task(statement, check_correct, user_variables, tests):
     show_text(statement)
 
     show_text("Use <tt>and</tt>, <tt>or</tt>, <tt>not</tt> as logical operators, <tt>&gt;</tt>, <tt>&gt;=</tt>, <tt>&lt;</tt>, <tt>&lt;=</tt>, <tt>==</tt>, <tt>!=</tt> as comparison operators.")
@@ -34,7 +34,7 @@ def verifier_task(statement, check_correct, show_example, user_variables, tests)
             if ans == "":
                 show_text("Enter you answer")
             else:
-                show_text("wrong expression")
+                show_text("Syntax error in expression")
             return
 
         #now test
@@ -81,7 +81,12 @@ def show_example(a, b, c):
 def show_text(text):
     show(HtmlFragment(text))
     
-verifier_task("In what conditions on $a$, $b$, $c$ the function $f(x) = ax^2+bx+c$ does not intersect the second quarter?", check_correct, show_example, user_variables, tests)
+verifier_task(
+    "In what conditions on $a$, $b$, $c$ the function $f(x) = ax^2+bx+c$ does not intersect the second quarter?",
+    check_correct,
+    user_variables,
+    tests
+)
     </script>
     </div>
 

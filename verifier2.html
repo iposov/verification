@@ -1,75 +1,83 @@
 <!DOCTYPE HTML>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <title>Verification</title>
-    <script src="https://sagecell.sagemath.org/static/jquery.min.js"></script>
     <script src="https://sagecell.sagemath.org/static/embedded_sagecell.js"></script>
-    <script>$(function () {
-    // Make the div with id 'mycell' a Sage cell
-    sagecell.makeSagecell({inputLocation:  '#load',
+    <script>
+    sagecell.makeSagecell({inputLocation:  '#verification-template',
                            template:       sagecell.templates.minimal,
-                           autoeval: true});
-    sagecell.makeSagecell({inputLocation:  '#mycell',
-                           template:       sagecell.templates.minimal,
-                           autoeval: true});
+                           autoeval: true,
+                           hide: ["evalButton"]
     });
     </script>
   </head>
   <body>
-  
-    <div id='load'><script type="text/x-sage">
-    </script></div>
 
-    <div id="mycell">
+    <div id="verification-template">
     <script type="text/x-sage">
+from sage.misc.html import HtmlFragment
+from sage.interfaces.qepcad import qformula
 
-def verifier_task_qe(statement, show_example, teacher_formula, n_teacher_formula):
-    show(statement)
+def verifier_task_qe(statement, show_example, teacher_formula, vars, qvars):
+    show_text(statement)
+
+    show_text(r"Use <tt>/\</tt>, <tt>\/</tt>, <tt>~</tt>, <tt>==></tt>, <tt><==></tt> as logical operators, <tt>&gt;</tt>, <tt>&gt;=</tt>, <tt>&lt;</tt>, <tt>&lt;=</tt>, <tt>=</tt>, <tt>/=</tt> as comparison operators.")
 
     @interact
-    def _(ans=input_box(default="", label="Your answer", type=str)):
-        correct1 = qepcad(teacher_formula, assume=ans) == "TRUE"
-        nans = '~[' + ans + ']' #'a < 0 \/ b > 0 \/ [ a <= 0 /\ b >= 0 ]'
-        correct2 = qepcad(teacher_formula, assume=nans) == "FALSE"
-        
-        refuter_test = None
-        complementer_test = None
-        print(correct1)
-        print(correct2)
-        if not correct1:
-            refuter_test = qepcad(n_teacher_formula, assume=ans, solution='any-point')
-        if not correct2:          
-            print('nans', nans)
-            complementer_test = qepcad(teacher_formula, assume=nans, solution='any-point')
+    def _(ans=input_box(default=r"a + b + c < 0", label="Your answer", type=str)):
+        teacher_formula_wrapped = qformula(teacher_formula, frozenset(vars), list(qvars))
+        teacher_formula_simplified = qepcad(teacher_formula_wrapped)
+
+        ans = ans.replace('(', '[').replace(')', ']')
+
+        refuter_formula = fr'[[~[{teacher_formula_simplified}]] /\ [{ans}]]'
+        complementer_formula = fr'[[{teacher_formula_simplified}] /\ [~[{ans}]]]'
+
+        refuter_formula_wrapped=qformula(refuter_formula, vars=frozenset(vars))
+        refuter_formula_simplified = qepcad(refuter_formula_wrapped)
+        complementer_formula_wrapped=qformula(complementer_formula, vars=frozenset(vars))
+        complementer_formula_simplified = qepcad(complementer_formula_wrapped)
+
+        has_refuting = refuter_formula_simplified != "FALSE"
+        has_complementer = complementer_formula_simplified != "FALSE"
     
-        if not correct1 or not correct2:
-            if refuter_test is not None:
-                print("the following example refutes it:")
+        if has_refuting or has_complementer:
+            show_text("Your answer is wrong,")
+            if has_refuting:
+                show_text("the following example refutes it:")
+                refuter_test = qepcad(refuter_formula_wrapped, solution='any-point')
                 show_example(**refuter_test)
-                print(refuter_test)
                 
-            if complementer_test is not None:
-                print("the following example complements it:")
+            if has_complementer:
+                show_text("the following example complements it:")
+                complementer_test = qepcad(complementer_formula_wrapped, solution='any-point')
                 show_example(**complementer_test)
-                print(complementer_test)
-                
-var('a,b,c,x')
+        else:
+          show_text("You are correct!")
+
 
 def show_example(a, b, c):
-    f(x) = a * x^2 + b*x + c
-    show("$f(x) = " + latex(f(x)) + "$")
+    var('a,b,c,x')
+    f(x) = a*x^2 + b*x + c
+    show("f(x) = " + latex(f(x)))
     show(plot(f(x), (x, -5, 5), figsize=[2, 2]))
-    
-qf = qepcad_formula
-ff = qf.implies(x < 0, a * x^2 + b * x + c < 0)
-f = qf.forall(x, ff)
-nf = qf.exists(x, qf.not_(ff))
 
-print(nf)
+def show_text(text):
+    show(HtmlFragment(text))
 
-verifier_task_qe("In what conditions on a, b, c the function $f(x) = ax+b$ does not intersect the second quarter?", show_example, f, nf)
+teacher_formula = "(A x) [[x <= 0] ==> [a x^2 + b x + c < 0]]"
+vars = 'abc'  # free variables go first
+qvars = 'x'
+
+verifier_task_qe(
+  "In what conditions on $a$, $b$, $c$ the function $f(x) = ax^2+bx+c$ does not intersect the second quarter?",
+  show_example,
+  teacher_formula,
+  vars,
+  qvars
+)
                 
 
     </script>
